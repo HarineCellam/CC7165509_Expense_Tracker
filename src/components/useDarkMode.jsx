@@ -15,6 +15,7 @@ export default function useDarkMode() {
   return [theme, setTheme];
 }
 
+// const [theme, setTheme] = useDarkMode();
 {/* <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className={`w-12 h-6 flex items-center bg-gray-300 dark:bg-gray-600 rounded-full p-1 transition duration-300 ease-in-out ${theme === 'dark' ? 'justify-end' : 'justify-start'}`}
               aria-label="Toggle Theme">
