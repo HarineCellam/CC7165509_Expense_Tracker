@@ -1,5 +1,5 @@
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
@@ -20,6 +20,13 @@ const Signup = () => {
     const togglePasswordVisibility = () => setShowPassword(!showPassword);
     const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
 
+    useEffect(() => {
+        const savedData = localStorage.getItem("signupData");
+        if (savedData) {
+            setFormData(JSON.parse(savedData));
+        }
+    }, []);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -32,7 +39,18 @@ const Signup = () => {
             return;
         }
 
+        let users = JSON.parse(localStorage.getItem("users")) || [];
+        const userExists = users.some(user => user.email === formData.email);
+    
+        if (userExists) {
+            alert("User already exists! Try signing in.");
+            return;
+        }
+        users.push(formData);
+        localStorage.setItem("users", JSON.stringify(users));
+
         alert("Account created successfully!");
+        navigate("/login");
     };
 
     return (

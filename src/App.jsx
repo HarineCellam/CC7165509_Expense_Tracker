@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
+import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
 import LogIn from './pages/LogIn';
 import SignUp from './pages/SignUp';
@@ -43,6 +44,7 @@ function App() {
               <Route path='/' element={<Home/>} />
               <Route path="/login" element={<LogIn />} />
               <Route path="/signup" element={<SignUp />} />
+              <Route path='/forgotpassword' element={<ForgotPassword />} />
             </Routes>
           </div>
         </main>
