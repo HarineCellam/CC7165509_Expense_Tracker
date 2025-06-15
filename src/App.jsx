@@ -1,11 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link, Route, BrowserRouter as Router, Routes } from 'react-router-dom';
 import './App.css';
+import DashboardLayout from "./components/DashboardLayout";
+import Budget from './pages/Budget';
+import Dashboard from './pages/Dashboard';
+import Expense from './pages/Expense';
 import ForgotPassword from './pages/ForgotPassword';
 import Home from './pages/Home';
+import Income from './pages/Income';
 import LogIn from './pages/LogIn';
+import ProfilePage from './pages/ProfilePage';
+import Report from './pages/Report';
 import SignUp from './pages/SignUp';
-
 
 function App() {
 
@@ -23,7 +29,7 @@ function App() {
   return (
     <Router>
       <div className='min-h-screen flex flex-col bg-white dark:bg-gray-900'>
-        <nav className={`w-full fixed top-0 left-0 z-50 bg-white dark:bg-gray-800 transition-shadow ${shadow ? 'shadow-md' : 'shadow-none'}`}>
+          <nav className={`w-full fixed top-0 left-0 z-50 bg-white dark:bg-gray-800 transition-shadow ${shadow ? 'shadow-md' : 'shadow-none'}`}>
           <div className='mx-auto flex justify-between items-center bg-white text-blue-800 dark:bg-gray-800 dark:text-white px-6 py-4'>
             <h1 className='text-2xl font-bold text-blue-800 dark:text-white'>
               Expenz
@@ -45,6 +51,14 @@ function App() {
               <Route path="/login" element={<LogIn />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path='/forgotpassword' element={<ForgotPassword />} />
+              <Route element={<DashboardLayout />}>
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/income" element={<Income />} />
+                <Route path="/expense" element={<Expense />} />
+                <Route path="/budget" element={<Budget />} />
+                <Route path="/report" element={<Report />} />
+              </Route>
             </Routes>
           </div>
         </main>

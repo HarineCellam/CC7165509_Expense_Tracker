@@ -35,6 +35,7 @@ const Login = () => {
         }
 
         alert("Login successful!");
+        localStorage.setItem("loggedInUser", formData.email);
         navigate("/dashboard"); // Redirect to dashboard/homepage
     };
 
