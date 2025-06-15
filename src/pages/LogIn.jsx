@@ -16,12 +16,10 @@ const Login = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setErrorMessage(""); // Reset error
+        setErrorMessage("");
 
-        // Retrieve stored users from localStorage
         let users = JSON.parse(localStorage.getItem("users")) || [];
 
-        // Find the user with matching email
         const user = users.find(user => user.email === formData.email);
 
         if (!user) {
@@ -34,9 +32,8 @@ const Login = () => {
             return;
         }
 
-        alert("Login successful!");
         localStorage.setItem("loggedInUser", formData.email);
-        navigate("/dashboard"); // Redirect to dashboard/homepage
+        navigate("/dashboard");
     };
 
     return (

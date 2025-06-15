@@ -48,8 +48,6 @@ const Signup = () => {
         }
         users.push(formData);
         localStorage.setItem("users", JSON.stringify(users));
-
-        alert("Account created successfully!");
         navigate("/login");
     };
 
