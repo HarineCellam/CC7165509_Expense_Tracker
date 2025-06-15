@@ -75,9 +75,9 @@ const Signup = () => {
                             {showConfirmPassword ? <EyeSlashIcon className="w-6 h-6" /> : <EyeIcon className="w-6 h-6" />}
                         </button>
                     </div>
-                    <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg text-lg w-full">
-                        Create Account
-                    </button>
+                    <div className="flex justify-center">
+                        <button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-500 dark:from-gray-700 dark:to-gray-900 hover:from-blue-700 hover:to-purple-600 text-white py-3 px-6 rounded-lg text-lg transition-all duration-300"> Create Amount </button>
+                    </div>
                 </form>
                 <p className="text-center mt-4">
                     Already a Member?{" "}

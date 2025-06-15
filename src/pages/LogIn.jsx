@@ -51,10 +51,9 @@ const Login = () => {
                     </div>
 
                     {errorMessage && <p className="text-red-500 text-center">{errorMessage}</p>}
-
-                    <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg text-lg w-full">
-                        Login
-                    </button>
+                    <div className="flex justify-center">
+                        <button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-500 dark:from-gray-700 dark:to-gray-900 hover:from-blue-700 hover:to-purple-600 text-white py-3 px-6 rounded-lg text-lg transition-all duration-300"> Login </button>
+                    </div>
                 </form>
                 <p className="text-center mt-4">
                     <button onClick={() => navigate("/forgotpassword")} className="text-blue-600 hover:underline">
