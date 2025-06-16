@@ -1,42 +1,53 @@
 import { useEffect, useState } from "react";
-import AddIncome from "../components/AddIncome";
+import TransactionForm from "../components/TransactionForm";
+import TransactionPanel from "../components/TransactionPanel";
 
 const Income = () => {
-  const [income, setIncome] = useState([]);
+  const [transactions, setTransactions] = useState([]);
 
-  // Load saved income from localStorage
   useEffect(() => {
-    const savedIncome = JSON.parse(localStorage.getItem("income")) || [];
-    setIncome(savedIncome);
+    const userId = localStorage.getItem("userId") || "guest";
+    const savedTransactions = JSON.parse(localStorage.getItem(`transactions_${userId}`)) || [];
+
+    // Ensure only income transactions are loaded
+    const incomeTransactions = savedTransactions.filter((entry) => entry.type === "income");
+    setTransactions(incomeTransactions);
   }, []);
 
-  // Save income to localStorage
   useEffect(() => {
-    localStorage.setItem("income", JSON.stringify(income));
-  }, [income]);
+    const userId = localStorage.getItem("userId") || "guest";
+    const savedTransactions = JSON.parse(localStorage.getItem(`transactions_${userId}`)) || [];
 
-  const addIncome = (newEntry) => {
-    setIncome([...income, newEntry]);
+    // Merge new transactions with existing ones
+    const allTransactions = [...savedTransactions.filter(entry => entry.type !== "income"), ...transactions];
+
+    localStorage.setItem(`transactions_${userId}`, JSON.stringify(allTransactions));
+  }, [transactions]);
+
+  const addTransaction = (newEntry) => {
+    setTransactions([...transactions, { ...newEntry, type: "income" }]);
+  };
+
+  const deleteTransaction = (id) => {
+    const userId = localStorage.getItem("userId") || "guest";
+
+    // Remove the transaction
+    const updatedTransactions = transactions.filter((entry) => entry.id !== id);
+
+    // Merge remaining transactions with existing non-income transactions
+    const savedTransactions = JSON.parse(localStorage.getItem(`transactions_${userId}`)) || [];
+    const allTransactions = [...savedTransactions.filter(entry => entry.type !== "income"), ...updatedTransactions];
+
+    localStorage.setItem(`transactions_${userId}`, JSON.stringify(allTransactions));
+
+    // Update state
+    setTransactions(updatedTransactions);
   };
 
   return (
     <div className="flex gap-6 p-6">
-      {/* Add Income Form */}
-      <AddIncome addIncome={addIncome} />
-
-      {/* Income List */}
-      <div className="flex-1 bg-gray-100 dark:bg-gray-800 p-6 rounded-lg shadow-md overflow-y-auto">
-        <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Income History</h3>
-        <ul className="space-y-2">
-          {income.map((entry) => (
-            <li key={entry.id} className="bg-gray-200 dark:bg-gray-700 p-3 rounded-md flex justify-between">
-              <span className="font-bold">₹{entry.amount}</span>
-              <span>{entry.category} - {entry.date}</span>
-            </li>
-          ))}
-        </ul>
-        <h3 className="mt-4 text-lg font-bold text-gray-800 dark:text-white">Total Income: ₹{income.reduce((sum, entry) => sum + entry.amount, 0)}</h3>
-      </div>
+      <TransactionForm addTransaction={addTransaction} type="income" />
+      <TransactionPanel transactions={transactions} type="income" deleteTransaction={deleteTransaction} />
     </div>
   );
 };

@@ -28,7 +28,7 @@ const SidePanel = () => {
           { label: "Income", path: "/income" },
           { label: "Expense", path: "/expense" },
           { label: "Budget", path: "/budget" },
-          { label: "Report", path: "/report" },
+          { label: "Report", path: "/report" }
         ].map((item) => (
           <li
             key={item.path}
