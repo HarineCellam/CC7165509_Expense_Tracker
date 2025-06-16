@@ -8,8 +8,6 @@ const Income = () => {
   useEffect(() => {
     const userId = localStorage.getItem("userId") || "guest";
     const savedTransactions = JSON.parse(localStorage.getItem(`transactions_${userId}`)) || [];
-
-    // Ensure only income transactions are loaded
     const incomeTransactions = savedTransactions.filter((entry) => entry.type === "income");
     setTransactions(incomeTransactions);
   }, []);
@@ -17,10 +15,10 @@ const Income = () => {
   useEffect(() => {
     const userId = localStorage.getItem("userId") || "guest";
     const savedTransactions = JSON.parse(localStorage.getItem(`transactions_${userId}`)) || [];
-
-    // Merge new transactions with existing ones
-    const allTransactions = [...savedTransactions.filter(entry => entry.type !== "income"), ...transactions];
-
+    const allTransactions = [
+      ...savedTransactions.filter(entry => entry.type !== "income"),
+      ...transactions
+    ];
     localStorage.setItem(`transactions_${userId}`, JSON.stringify(allTransactions));
   }, [transactions]);
 
@@ -29,25 +27,18 @@ const Income = () => {
   };
 
   const deleteTransaction = (id) => {
-    const userId = localStorage.getItem("userId") || "guest";
-
-    // Remove the transaction
     const updatedTransactions = transactions.filter((entry) => entry.id !== id);
-
-    // Merge remaining transactions with existing non-income transactions
-    const savedTransactions = JSON.parse(localStorage.getItem(`transactions_${userId}`)) || [];
-    const allTransactions = [...savedTransactions.filter(entry => entry.type !== "income"), ...updatedTransactions];
-
-    localStorage.setItem(`transactions_${userId}`, JSON.stringify(allTransactions));
-
-    // Update state
     setTransactions(updatedTransactions);
   };
 
   return (
     <div className="flex gap-6 p-6">
       <TransactionForm addTransaction={addTransaction} type="income" />
-      <TransactionPanel transactions={transactions} type="income" deleteTransaction={deleteTransaction} />
+      <TransactionPanel 
+        transactions={transactions} 
+        type="income" 
+        deleteTransaction={deleteTransaction} 
+      />
     </div>
   );
 };
