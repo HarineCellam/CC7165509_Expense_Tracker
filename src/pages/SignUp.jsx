@@ -76,7 +76,7 @@ const Signup = () => {
                         </button>
                     </div>
                     <div className="flex justify-center">
-                        <button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-500 dark:from-gray-700 dark:to-gray-900 hover:from-blue-700 hover:to-purple-600 text-white py-3 px-6 rounded-lg text-lg transition-all duration-300"> Create Amount </button>
+                        <button type="submit" className="bg-gradient-to-r from-blue-600 to-purple-500 dark:from-gray-700 dark:to-gray-900 hover:from-blue-700 hover:to-purple-600 text-white py-3 px-6 rounded-lg text-lg transition-all duration-300"> Create Account </button>
                     </div>
                 </form>
                 <p className="text-center mt-4">
