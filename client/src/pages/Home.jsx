@@ -1,37 +1,151 @@
 import emailjs from "emailjs-com";
 import { motion } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { FaBars, FaTimes } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
 function Home() {
     const navigate = useNavigate();
     const formRef = useRef(null);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [activeSection, setActiveSection] = useState('home');
+    const [shadow, setShadow] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setShadow(window.scrollY > 10);
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
+    };
+
+    const scrollToSection = (sectionId) => {
+        setActiveSection(sectionId);
+        const element = document.getElementById(sectionId);
+        if (element) {
+            const yOffset = -80; 
+            const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+        setIsMenuOpen(false);
+    };
 
     const sendEmail = (e) => {
-    e.preventDefault();
+        e.preventDefault();
 
-    emailjs.sendForm(
-        "service_i98ozws",
-        "template_0h92pkn",
-        e.target,
-        "lSCnmAhkXcyxWspmR"
-    ).then(
-        (result) => {
-            alert("Message sent successfully!");
-            console.log(result.text);
-            formRef.current.reset();
-        },
-        (error) => {
-            alert("Failed to send message. Please try again.");
-            console.error(error.text);
-          }
-      );
+        emailjs.sendForm(
+            "service_i98ozws",
+            "template_0h92pkn",
+            e.target,
+            "lSCnmAhkXcyxWspmR"
+        ).then(
+            (result) => {
+                alert("Message sent successfully!");
+                console.log(result.text);
+                formRef.current.reset();
+            },
+            (error) => {
+                alert("Failed to send message. Please try again.");
+                console.error(error.text);
+            }
+        );
     };
+    
     return (
         <div className="dark:bg-gray-900 bg-gray-100 text-gray-800 dark:text-gray-300 min-h-screen">
+            {/* Navigation Bar - only on home page */}
+            <nav className={`fixed top-0 left-0 w-full z-50 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 transition-shadow duration-300 ${
+                shadow ? 'shadow-md' : 'shadow-none'
+            }`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between h-16">
+                        <div className="flex items-center">
+                            <div className="text-xl font-bold text-blue-600 dark:text-blue-300">Expenz</div>
+                        </div>
+                        
+                        {/* Desktop Navigation} */}
+                        <div className="hidden md:flex items-center space-x-4">
+                            {['home', 'about', 'services', 'contact'].map((item) => (
+                                <button
+                                    key={item}
+                                    onClick={() => scrollToSection(item)}
+                                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                                        activeSection === item
+                                            ? 'bg-blue-600 text-white'
+                                            : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                                </button>
+                            ))}
+                            <button 
+                                onClick={() => navigate('/login')}
+                                className="ml-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                            >
+                                Login
+                            </button>
+                            <button 
+                                onClick={() => navigate('/signup')}
+                                className="ml-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                            >
+                                Sign Up
+                            </button>
+                        </div>
+                        
+                        {/* Mobile Menu Button */}
+                        <div className="md:hidden flex items-center">
+                            <button
+                                onClick={toggleMenu}
+                                className="text-gray-500 dark:text-gray-300 hover:text-white focus:outline-none"
+                            >
+                                {isMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                {/* Mobile Navigation */}
+                {isMenuOpen && (
+                    <div className="md:hidden bg-white dark:bg-gray-800">
+                        <div className="px-2 pt-2 pb-3 space-y-1">
+                            {['home', 'about', 'services', 'contact'].map((item) => (
+                                <button
+                                    key={item}
+                                    onClick={() => scrollToSection(item)}
+                                    className={`block px-3 py-2 rounded-md text-base font-medium w-full text-left ${
+                                        activeSection === item
+                                            ? 'bg-blue-600 text-white'
+                                            : 'hover:bg-gray-200 dark:hover:bg-gray-700'
+                                    }`}
+                                >
+                                    {item.charAt(0).toUpperCase() + item.slice(1)}
+                                </button>
+                            ))}
+                            <div className="flex space-x-2 px-3 py-2">
+                                <button 
+                                    onClick={() => navigate('/login')}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex-1"
+                                >
+                                    Login
+                                </button>
+                                <button 
+                                    onClick={() => navigate('/signup')}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm font-medium flex-1"
+                                >
+                                    Sign Up
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </nav>
 
             {/* Home Section */}
-            <div className="relative h-[50vh] w-full bg-cover bg-center bg-no-repeat dark:bg-gray-900" style={{ backgroundImage: "url('/home-bg-img.jpg')" }}>
+            <div id="home" className="relative h-[50vh] w-full bg-cover bg-center bg-no-repeat mt-16 pt-16" style={{ backgroundImage: "url('/home-bg-img.jpg')" }}>
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                     <div className="text-center text-white px-6">
                         <h2 className="text-4xl font-bold mb-4">Welcome to Expenz</h2>

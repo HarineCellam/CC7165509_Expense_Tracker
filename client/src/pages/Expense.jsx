@@ -1,4 +1,3 @@
-// Expense.js
 import { useEffect, useState } from "react";
 import TransactionForm from "../components/TransactionForm";
 import TransactionPanel from "../components/TransactionPanel";
@@ -24,7 +23,6 @@ const Expense = () => {
   }, [transactions]);
 
   const addTransaction = (newEntry) => {
-    // Convert amount to negative for expenses
     const expenseEntry = { 
       ...newEntry, 
       amount: -Math.abs(newEntry.amount), 
@@ -39,13 +37,17 @@ const Expense = () => {
   };
 
   return (
-    <div className="flex gap-6 p-6">
-      <TransactionForm addTransaction={addTransaction} type="expense" />
-      <TransactionPanel 
-        transactions={transactions} 
-        type="expense" 
-        deleteTransaction={deleteTransaction} 
-      />
+    <div className="flex flex-col lg:flex-row gap-4 p-4">
+      <div className="w-full lg:w-1/3">
+        <TransactionForm addTransaction={addTransaction} type="expense" />
+      </div>
+      <div className="w-full lg:w-2/3">
+        <TransactionPanel 
+          transactions={transactions} 
+          type="expense" 
+          deleteTransaction={deleteTransaction} 
+        />
+      </div>
     </div>
   );
 };

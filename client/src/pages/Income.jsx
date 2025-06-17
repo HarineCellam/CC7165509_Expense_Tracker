@@ -32,13 +32,17 @@ const Income = () => {
   };
 
   return (
-    <div className="flex gap-6 p-6">
-      <TransactionForm addTransaction={addTransaction} type="income" />
-      <TransactionPanel 
-        transactions={transactions} 
-        type="income" 
-        deleteTransaction={deleteTransaction} 
-      />
+    <div className="flex flex-col lg:flex-row gap-4 p-4">
+      <div className="w-full lg:w-1/3">
+        <TransactionForm addTransaction={addTransaction} type="income" />
+      </div>
+      <div className="w-full lg:w-2/3">
+        <TransactionPanel 
+          transactions={transactions} 
+          type="income" 
+          deleteTransaction={deleteTransaction} 
+        />
+      </div>
     </div>
   );
 };
