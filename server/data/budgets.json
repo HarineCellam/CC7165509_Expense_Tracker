@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": "1750214321686",
+    "category": "Food",
+    "amount": 3000,
+    "period": "monthly"
+  },
+  {
+    "id": "1750214343576",
+    "category": "Rent",
+    "amount": 5000,
+    "period": "monthly"
+  },
+  {
+    "id": "1750214412821",
+    "category": "Health",
+    "amount": 1000,
+    "period": "monthly"
+  }
+]
