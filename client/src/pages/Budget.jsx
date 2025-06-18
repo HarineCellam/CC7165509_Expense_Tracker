@@ -11,7 +11,7 @@ const Budget = () => {
   const [activeTab, setActiveTab] = useState('weekly');
   const [editingId, setEditingId] = useState(null);
   
-  // Default categories (only expenses)
+  // Default categories
   const expenseCategories = [
     "Food", "Rent", "Transport", "Entertainment", 
     "Utilities", "Shopping", "Health", "Education", "Other"
