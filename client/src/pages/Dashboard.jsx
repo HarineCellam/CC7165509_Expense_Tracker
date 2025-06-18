@@ -1,10 +1,10 @@
 // Dashboard.js
 import { useEffect, useState } from 'react';
 import {
-    FaChartBar,
-    FaChartPie,
-    FaMoneyCheckAlt,
-    FaRupeeSign
+  FaChartBar,
+  FaChartPie,
+  FaMoneyCheckAlt,
+  FaRupeeSign
 } from 'react-icons/fa';
 import BarChart from '../components/charts/BarChart';
 import PieChart from '../components/charts/PieChart';
@@ -220,7 +220,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="mt-4 text-green-500 text-sm font-medium">
-              +12% from last month
+              +0% from last month
             </div>
           </div>
           
@@ -237,7 +237,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="mt-4 text-red-500 text-sm font-medium">
-              -5% from last month
+              -0% from last month
             </div>
           </div>
           
