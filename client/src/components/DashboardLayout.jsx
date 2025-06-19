@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import api from "../api";
+import apiService from "../api";
 import SidePanel from "./SidePanel";
 
 const DashboardLayout = () => {
@@ -9,21 +9,26 @@ const DashboardLayout = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          navigate('/login');
-          return;
-        }
-        
-        const response = await api.get('/api/profile');
-        setUser(response.data);
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-        localStorage.removeItem("token");
-        navigate('/login');
-      }
-    };
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+    
+    const email = localStorage.getItem("userEmail"); 
+    if (!email) {
+      throw new Error("Email not found in localStorage");
+    }
+
+    const response = await apiService.profile.get(email);
+    setUser(response);
+  } catch (error) {
+    console.error("Failed to fetch user:", error);
+    localStorage.removeItem("token");
+    navigate('/login');
+  }
+};
 
     fetchUser();
   }, [navigate]);

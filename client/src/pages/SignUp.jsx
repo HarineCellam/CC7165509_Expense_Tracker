@@ -1,7 +1,7 @@
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
+import apiService from '../api';
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -76,39 +76,42 @@ const Signup = () => {
     };
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!validateForm()) return;
+    e.preventDefault();
+    
+    if (!validateForm()) return;
 
-        setIsLoading(true);
-        setSuccessMessage("");
-        
-        try {
-            const response = await api.post('/api/signup', {
-                name: formData.name.trim(),
-                email: formData.email.trim().toLowerCase(),
-                password: formData.password,
-                phone: formData.phone.trim(),
-                dob: formData.dob,
-                address: formData.address.trim(),
-                city: formData.city.trim(),
-                state: formData.state.trim(),
-                country: formData.country.trim(),
-                postalCode: formData.postalCode.trim(),
-                occupation: formData.occupation.trim(),
-                gender: formData.gender,
-                maritalStatus: formData.maritalStatus
-            });
+    setIsLoading(true);
+    setSuccessMessage("");
+    
+    try {
+        const response = await apiService.auth.signup({
+            name: formData.name.trim(),
+            email: formData.email.trim().toLowerCase(),
+            password: formData.password,
+            phone: formData.phone.trim(),
+            dob: formData.dob,
+            address: formData.address.trim(),
+            city: formData.city.trim(),
+            state: formData.state.trim(),
+            country: formData.country.trim(),
+            postalCode: formData.postalCode.trim(),
+            occupation: formData.occupation.trim(),
+            gender: formData.gender,
+            maritalStatus: formData.maritalStatus
+        });
 
-            setSuccessMessage("Account created successfully! Redirecting to login...");
-            setTimeout(() => navigate("/login"), 2000);
-        } catch (error) {
-            const errorMsg = error.response?.data?.error || 'Signup failed. Please try again.';
-            setErrors(prev => ({ ...prev, form: errorMsg }));
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        setSuccessMessage("Account created successfully! Redirecting to login...");
+        setTimeout(() => navigate("/login"), 2000);
+    } catch (error) {
+        console.error("Signup error:", error);  // Added for better debugging
+        const errorMsg = error.response?.data?.error || 
+                        error.message || 
+                        'Signup failed. Please try again.';
+        setErrors(prev => ({ ...prev, form: errorMsg }));
+    } finally {
+        setIsLoading(false);
+    }
+};
 
     const getPasswordStrength = (password) => {
         if (!password) return 0;
