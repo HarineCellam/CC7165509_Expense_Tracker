@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { FaRupeeSign } from "react-icons/fa";
 import { FiCalendar, FiInfo, FiTag } from "react-icons/fi";
+import api from "../api";
 
 const TransactionPanel = ({ transactions, type, deleteTransaction }) => {
   const [sortedTransactions, setSortedTransactions] = useState([]);
   const [filter, setFilter] = useState("");
   const [sortOption, setSortOption] = useState("newest");
   const [currency] = useState(localStorage.getItem("currency") || "₹");
+  const [isDeleting, setIsDeleting] = useState(null);
 
   const categories = [...new Set(transactions.map(t => t.category))];
 
@@ -33,6 +35,18 @@ const TransactionPanel = ({ transactions, type, deleteTransaction }) => {
       return `-${currency}${Math.abs(amount).toLocaleString()}`;
     }
     return `${currency}${amount.toLocaleString()}`;
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      setIsDeleting(id);
+      await api.delete(`/api/transactions/${id}`);
+      deleteTransaction(id);
+    } catch (error) {
+      console.error("Failed to delete transaction:", error);
+    } finally {
+      setIsDeleting(null);
+    }
   };
 
   const total = sortedTransactions.reduce((sum, entry) => sum + entry.amount, 0);
@@ -72,7 +86,7 @@ const TransactionPanel = ({ transactions, type, deleteTransaction }) => {
           <ul className="space-y-2">
             {sortedTransactions.map((entry) => (
               <li 
-                key={entry.id} 
+                key={entry._id} 
                 className="bg-gray-200 dark:bg-gray-700 p-3 rounded-md flex flex-col sm:flex-row sm:justify-between sm:items-center hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
               >
                 <div className="flex justify-between items-center sm:block">
@@ -80,11 +94,12 @@ const TransactionPanel = ({ transactions, type, deleteTransaction }) => {
                     {formatCurrency(entry.amount)}
                   </span>
                   <button 
-                    onClick={() => deleteTransaction(entry.id)} 
+                    onClick={() => handleDelete(entry._id)} 
                     className="text-red-500 hover:text-red-700 p-1 transition-colors sm:hidden"
+                    disabled={isDeleting === entry._id}
                     aria-label="Delete transaction"
                   >
-                    🗑️
+                    {isDeleting === entry._id ? '⏳' : '🗑️'}
                   </button>
                 </div>
                 
@@ -107,11 +122,12 @@ const TransactionPanel = ({ transactions, type, deleteTransaction }) => {
                 </div>
                 
                 <button 
-                  onClick={() => deleteTransaction(entry.id)} 
+                  onClick={() => handleDelete(entry._id)} 
                   className="text-red-500 hover:text-red-700 p-1 transition-colors hidden sm:block"
+                  disabled={isDeleting === entry._id}
                   aria-label="Delete transaction"
                 >
-                  🗑️
+                  {isDeleting === entry._id ? '⏳' : '🗑️'}
                 </button>
               </li>
             ))}

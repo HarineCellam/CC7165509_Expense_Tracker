@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { FaCalendarAlt, FaChartPie, FaRupeeSign, FaTrashAlt } from 'react-icons/fa';
+import apiService from '../api';
 
 const Budget = () => {
   const [budgets, setBudgets] = useState([]);
@@ -10,6 +11,8 @@ const Budget = () => {
   });
   const [activeTab, setActiveTab] = useState('weekly');
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   
   // Default categories
   const expenseCategories = [
@@ -19,18 +22,36 @@ const Budget = () => {
   
   const periods = ['daily', 'weekly', 'monthly', 'yearly'];
 
-  // Load budgets from localStorage on mount
-  useEffect(() => {
-    const userId = localStorage.getItem('userId') || 'guest';
-    const savedBudgets = JSON.parse(localStorage.getItem(`budgets_${userId}`)) || [];
-    setBudgets(savedBudgets);
-  }, []);
+  const user = JSON.parse(localStorage.getItem('user'));
+  const userId = user?._id;
 
-  // Save budgets to localStorage whenever they change
+  const fetchBudgets = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await apiService.budgets.getAll(userId);
+      setBudgets(response.data);
+    } catch (error) {
+      console.error('Error fetching budgets:', error);
+      setError('Failed to load budgets. Please try again.');
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const userId = localStorage.getItem('userId') || 'guest';
-    localStorage.setItem(`budgets_${userId}`, JSON.stringify(budgets));
-  }, [budgets]);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      window.location.href = '/login';
+    } else {
+      fetchBudgets();
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -40,31 +61,36 @@ const Budget = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.category || !formData.amount) return;
-    
-    const newBudget = {
-      id: editingId || Date.now(),
-      ...formData,
-      amount: Number(formData.amount)
-    };
-    
-    if (editingId) {
-      setBudgets(budgets.map(budget => 
-        budget.id === editingId ? newBudget : budget
-      ));
-      setEditingId(null);
-    } else {
-      setBudgets([...budgets, newBudget]);
+    if (!formData.category || !formData.amount) {
+      setError('Please fill all required fields');
+      return;
     }
     
-    setFormData({
-      category: '',
-      amount: '',
-      period: 'monthly'
-    });
+    try {
+      setError(null);
+      const budgetData = {
+        category: formData.category,
+        amount: Number(formData.amount),
+        period: formData.period,
+        userId
+      };
+
+      if (editingId) {
+        await apiService.budgets.update(editingId, budgetData);
+      } else {
+        await apiService.budgets.create(budgetData);
+      }
+
+      await fetchBudgets();
+      setFormData({ category: '', amount: '', period: 'monthly' });
+      setEditingId(null);
+    } catch (error) {
+      console.error('Error saving budget:', error);
+      setError(error.message || 'Failed to save budget');
+    }
   };
 
   const handleEdit = (budget) => {
@@ -73,33 +99,33 @@ const Budget = () => {
       amount: budget.amount,
       period: budget.period
     });
-    setEditingId(budget.id);
+    setEditingId(budget._id);
   };
 
-  const handleDelete = (id) => {
-    setBudgets(budgets.filter(budget => budget.id !== id));
-    if (editingId === id) {
-      setEditingId(null);
-      setFormData({
-        category: '',
-        amount: '',
-        period: 'monthly'
-      });
+  const handleDelete = async (id) => {
+    try {
+      setError(null);
+      await apiService.budgets.delete(id);
+      await fetchBudgets();
+      if (editingId === id) {
+        setEditingId(null);
+        setFormData({ category: '', amount: '', period: 'monthly' });
+      }
+    } catch (error) {
+      console.error('Error deleting budget:', error);
+      setError('Failed to delete budget');
     }
   };
 
   // Filter budgets by period
   const filteredBudgets = budgets.filter(budget => budget.period === activeTab);
   
-  // Calculate total budget for active period
+  // Calculate totals
   const totalBudget = filteredBudgets.reduce((sum, budget) => sum + budget.amount, 0);
-  
-  // Calculate total budget across all periods
   const totalAllBudgets = budgets.reduce((sum, budget) => sum + budget.amount, 0);
   
   // Calculate progress for each budget
   const calculateProgress = (budget) => {
-    // In a real app, this would compare with actual expenses
     const randomProgress = Math.floor(Math.random() * 100);
     return {
       value: randomProgress,
@@ -120,6 +146,12 @@ const Budget = () => {
           </p>
         </header>
 
+        {error && (
+          <div className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg">
+            {error}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Budget Form */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6">
@@ -130,7 +162,7 @@ const Budget = () => {
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Category</label>
+                <label className="block text-sm font-medium mb-1">Category *</label>
                 <select
                   name="category"
                   value={formData.category}
@@ -146,7 +178,7 @@ const Budget = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1">Amount</label>
+                <label className="block text-sm font-medium mb-1">Amount *</label>
                 <div className="flex items-center">
                   <span className="bg-gray-100 dark:bg-gray-700 p-3 rounded-l-lg border border-r-0 border-gray-300 dark:border-gray-600">
                     <FaRupeeSign />
@@ -158,6 +190,7 @@ const Budget = () => {
                     onChange={handleInputChange}
                     placeholder="Enter amount"
                     min="1"
+                    step="0.01"
                     className="flex-1 p-3 bg-white dark:bg-gray-800 rounded-r-lg border border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     required
                   />
@@ -165,7 +198,7 @@ const Budget = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1">Period</label>
+                <label className="block text-sm font-medium mb-1">Period *</label>
                 <div className="grid grid-cols-2 gap-2">
                   {periods.map(period => (
                     <label 
@@ -183,6 +216,7 @@ const Budget = () => {
                         checked={formData.period === period}
                         onChange={handleInputChange}
                         className="sr-only"
+                        required
                       />
                       {period.charAt(0).toUpperCase() + period.slice(1)}
                     </label>
@@ -192,9 +226,10 @@ const Budget = () => {
               
               <button
                 type="submit"
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-300"
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition duration-300 disabled:opacity-50"
+                disabled={loading}
               >
-                {editingId ? "Update Budget" : "Create Budget"}
+                {loading ? 'Processing...' : editingId ? 'Update Budget' : 'Create Budget'}
               </button>
               
               {editingId && (
@@ -208,7 +243,7 @@ const Budget = () => {
                       period: 'monthly'
                     });
                   }}
-                  className="w-full py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition duration-300"
+                  className="w-full py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 font-medium rounded-lg transition duration-300 mt-2"
                 >
                   Cancel Edit
                 </button>
@@ -243,14 +278,19 @@ const Budget = () => {
                 <h3 className="font-medium">Total {activeTab} budget:</h3>
                 <div className="text-xl font-bold flex items-center">
                   <FaRupeeSign className="mr-1" />
-                  {totalBudget.toLocaleString()}
+                  {totalBudget.toLocaleString('en-IN')}
                 </div>
               </div>
             </div>
             
             {/* Budget List */}
             <div className="p-4 max-h-[500px] overflow-y-auto">
-              {filteredBudgets.length === 0 ? (
+              {loading ? (
+                <div className="text-center py-10">
+                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                  <p>Loading budgets...</p>
+                </div>
+              ) : filteredBudgets.length === 0 ? (
                 <div className="text-center py-10">
                   <div className="bg-gray-200 dark:bg-gray-700 border-2 border-dashed rounded-xl w-16 h-16 mx-auto flex items-center justify-center mb-4">
                     <FaRupeeSign className="text-2xl text-gray-500 dark:text-gray-400" />
@@ -268,7 +308,7 @@ const Budget = () => {
                     const progress = calculateProgress(budget);
                     return (
                       <li 
-                        key={budget.id}
+                        key={budget._id}
                         className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-700"
                       >
                         <div className="flex justify-between items-start mb-2">
@@ -280,7 +320,7 @@ const Budget = () => {
                           </div>
                           <div className="text-lg font-bold flex items-center">
                             <FaRupeeSign className="mr-1" />
-                            {budget.amount.toLocaleString()}
+                            {budget.amount.toLocaleString('en-IN')}
                           </div>
                         </div>
                         
@@ -313,7 +353,7 @@ const Budget = () => {
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDelete(budget.id)}
+                            onClick={() => handleDelete(budget._id)}
                             className="px-3 py-1 text-sm bg-red-100 dark:bg-red-900/50 hover:bg-red-200 dark:hover:bg-red-800 text-red-600 dark:text-red-400 rounded-lg flex items-center"
                           >
                             <FaTrashAlt className="mr-1" /> Delete

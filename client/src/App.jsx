@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import API from './api';
 import './App.css';
 import DashboardLayout from "./components/DashboardLayout";
 import Budget from './pages/Budget';
@@ -13,6 +15,13 @@ import Report from './pages/Report';
 import SignUp from './pages/SignUp';
 
 function App() {
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+  }, []);
+
   return (
     <Router>
       <div className='min-h-screen flex flex-col bg-white dark:bg-gray-900'>

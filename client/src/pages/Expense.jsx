@@ -4,36 +4,57 @@ import TransactionPanel from "../components/TransactionPanel";
 
 const Expense = () => {
   const [transactions, setTransactions] = useState([]);
+  const userId = localStorage.getItem('userId');
 
-  useEffect(() => {
-    const userId = localStorage.getItem("userId") || "guest";
-    const savedTransactions = JSON.parse(localStorage.getItem(`transactions_${userId}`)) || [];
-    const expenseTransactions = savedTransactions.filter((entry) => entry.type === "expense");
-    setTransactions(expenseTransactions);
-  }, []);
-
-  useEffect(() => {
-    const userId = localStorage.getItem("userId") || "guest";
-    const savedTransactions = JSON.parse(localStorage.getItem(`transactions_${userId}`)) || [];
-    const allTransactions = [
-      ...savedTransactions.filter(entry => entry.type !== "expense"),
-      ...transactions
-    ];
-    localStorage.setItem(`transactions_${userId}`, JSON.stringify(allTransactions));
-  }, [transactions]);
-
-  const addTransaction = (newEntry) => {
-    const expenseEntry = { 
-      ...newEntry, 
-      amount: -Math.abs(newEntry.amount), 
-      type: "expense" 
-    };
-    setTransactions([...transactions, expenseEntry]);
+  const fetchTransactions = async () => {
+    try {
+      const response = await fetch(`/api/transactions?userId=${userId}&type=expense`);
+      const data = await response.json();
+      setTransactions(data);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+    }
   };
 
-  const deleteTransaction = (id) => {
-    const updatedTransactions = transactions.filter((entry) => entry.id !== id);
-    setTransactions(updatedTransactions);
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const addTransaction = async (newEntry) => {
+    try {
+      const response = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...newEntry,
+          amount: -Math.abs(newEntry.amount),
+          type: "expense",
+          userId
+        }),
+      });
+      
+      if (response.ok) {
+        fetchTransactions(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error adding transaction:', error);
+    }
+  };
+
+  const deleteTransaction = async (id) => {
+    try {
+      const response = await fetch(`/api/transactions?id=${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        fetchTransactions(); // Refresh the list
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+    }
   };
 
   return (

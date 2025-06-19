@@ -2,17 +2,13 @@ import { useEffect, useState } from "react";
 import { FaBars, FaChartPie, FaFileAlt, FaHome, FaMoneyBill, FaSignOutAlt, FaTimes, FaUser } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const SidePanel = () => {
+const SidePanel = ({ user }) => {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   
-  const userEmail = localStorage.getItem("loggedInUser");
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-  const user = users.find((u) => u.email === userEmail);
   const userInitial = user?.name?.charAt(0)?.toUpperCase() || "?";
 
-  // Check if device is mobile
   useEffect(() => {
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -39,11 +35,10 @@ const SidePanel = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("loggedInUser");
+    localStorage.removeItem("token");
     navigate("/login");
   };
 
-  // Navigation items with icons
   const navItems = [
     { label: "Dashboard", path: "/dashboard", icon: <FaHome /> },
     { label: "Income", path: "/income", icon: <FaMoneyBill /> },
@@ -61,12 +56,11 @@ const SidePanel = () => {
           isOpen ? "hidden" : "block"
         }`}
         aria-label="Toggle menu"
-        style={{ top: '4.5rem' }} // Position below header
+        style={{ top: '4.5rem' }}
       >
         <FaBars className="text-xl" />
       </button>
 
-      {/* Overlay for mobile */}
       {isMobile && isOpen && (
         <div 
           className="fixed inset-0 bg-black bg-opacity-50 z-40"
@@ -74,14 +68,12 @@ const SidePanel = () => {
         />
       )}
 
-      {/* Side panel */}
       <div
         className={`fixed md:relative w-64 h-[calc(100vh-4rem)] bg-white dark:bg-gray-900 p-4 shadow-xl flex flex-col justify-between z-50 transition-all duration-300 ease-in-out ${
           isOpen ? "left-0" : "-left-64"
         }`}
-        style={{ top: '4rem' }} // Position below header
+        style={{ top: '4rem' }}
       >
-        {/* Close button for mobile */}
         {isMobile && (
           <button
             onClick={togglePanel}
@@ -93,7 +85,6 @@ const SidePanel = () => {
         )}
 
         <div>
-          {/* Profile section */}
           <div
             onClick={() => handleNavigation("/profile")}
             className="flex flex-col items-center mb-8 cursor-pointer transition transform hover:scale-105 duration-200 mt-4"
@@ -109,7 +100,6 @@ const SidePanel = () => {
             </p>
           </div>
 
-          {/* Navigation items */}
           <ul className="flex flex-col gap-2 text-gray-700 dark:text-gray-200 font-medium">
             {navItems.map((item) => (
               <li
@@ -124,7 +114,6 @@ const SidePanel = () => {
           </ul>
         </div>
         
-        {/* Logout button */}
         <div className="mt-4">
           <button
             onClick={handleLogout}

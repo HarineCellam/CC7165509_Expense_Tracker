@@ -1,4 +1,3 @@
-// Dashboard.js
 import { useEffect, useState } from 'react';
 import {
   FaChartBar,
@@ -6,6 +5,7 @@ import {
   FaMoneyCheckAlt,
   FaRupeeSign
 } from 'react-icons/fa';
+import apiService from '../api';
 import BarChart from '../components/charts/BarChart';
 import PieChart from '../components/charts/PieChart';
 
@@ -20,38 +20,51 @@ const Dashboard = () => {
   const [pieChartData, setPieChartData] = useState(null);
 
   useEffect(() => {
-    // Simulate data loading
-    setTimeout(() => {
-      const userId = localStorage.getItem('userId') || 'guest';
-      
-      // Load transactions
-      const savedTransactions = JSON.parse(localStorage.getItem(`transactions_${userId}`)) || [];
-      setTransactions(savedTransactions);
-      
-      // Calculate totals
-      const income = savedTransactions
-        .filter(t => t.type === 'income')
-        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-      
-      const expense = savedTransactions
-        .filter(t => t.type === 'expense')
-        .reduce((sum, t) => sum + Math.abs(t.amount), 0);
-      
-      setIncomeTotal(income);
-      setExpenseTotal(expense);
-      
-      // Load budgets
-      const savedBudgets = JSON.parse(localStorage.getItem(`budgets_${userId}`)) || [];
-      setBudgets(savedBudgets);
-      
-      const budgetTotal = savedBudgets.reduce((sum, b) => sum + b.amount, 0);
-      setBudgetTotal(budgetTotal);
-      
-      // Prepare chart data
-      prepareChartData(savedTransactions);
-      
-      setLoading(false);
-    }, 800);
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const user = JSON.parse(localStorage.getItem('user'));
+        const userId = user?._id;
+
+        // Fetch transactions and budgets in parallel
+        const [transactionsRes, budgetsRes] = await Promise.all([
+          apiService.transactions.getAll(userId),
+          apiService.budgets.getAll(userId)
+        ]);
+
+        setTransactions(transactionsRes.data);
+        setBudgets(budgetsRes.data);
+
+        // Calculate totals
+        const income = transactionsRes.data
+          .filter(t => t.type === 'income')
+          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+        
+        const expense = transactionsRes.data
+          .filter(t => t.type === 'expense')
+          .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+        
+        const budgetTotal = budgetsRes.data.reduce((sum, b) => sum + b.amount, 0);
+
+        setIncomeTotal(income);
+        setExpenseTotal(expense);
+        setBudgetTotal(budgetTotal);
+
+        // Prepare chart data
+        prepareChartData(transactionsRes.data);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        if (error.response?.status === 401) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.href = '/login';
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   // Prepare data for charts

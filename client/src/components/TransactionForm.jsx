@@ -1,15 +1,16 @@
 import { useState } from "react";
+import api from "../api";
 
 const TransactionForm = ({ addTransaction, type }) => {
   const [form, setForm] = useState({ 
     amount: "", 
     category: "", 
-    date: "", 
+    date: new Date().toISOString().split('T')[0], 
     description: "", 
     currency: localStorage.getItem("currency") || "₹" 
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Define different categories for income and expense
   const incomeCategories = ["Salary", "Freelance", "Investments", "Gifts", "Other"];
   const expenseCategories = ["Food", "Rent", "Transport", "Entertainment", "Utilities", "Shopping", "Other"];
 
@@ -22,28 +23,34 @@ const TransactionForm = ({ addTransaction, type }) => {
     localStorage.setItem("currency", e.target.value);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.amount || !form.category || !form.date) return;
 
-    const userId = localStorage.getItem("userId") || "guest";
+    setIsSubmitting(true);
+    try {
+      const transactionData = {
+        ...form,
+        amount: Number(form.amount),
+        type,
+        currency: form.currency,
+      };
 
-    addTransaction({
-      ...form,
-      id: Date.now(),
-      amount: Number(form.amount),
-      type,
-      userId,
-      currency: form.currency,
-    });
-
-    setForm({ 
-      amount: "", 
-      category: "", 
-      date: "", 
-      description: "", 
-      currency: localStorage.getItem("currency") || "₹" 
-    });
+      const response = await api.post('/api/transactions', transactionData);
+      addTransaction(response.data);
+      
+      setForm({ 
+        amount: "", 
+        category: "", 
+        date: new Date().toISOString().split('T')[0], 
+        description: "", 
+        currency: localStorage.getItem("currency") || "₹" 
+      });
+    } catch (error) {
+      console.error("Failed to add transaction:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -107,9 +114,10 @@ const TransactionForm = ({ addTransaction, type }) => {
         />
         <button 
           type="submit" 
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md disabled:opacity-50"
+          disabled={isSubmitting}
         >
-          {type === "income" ? "Add Income" : "Add Expense"}
+          {isSubmitting ? "Processing..." : (type === "income" ? "Add Income" : "Add Expense")}
         </button>
       </form>
     </div>
