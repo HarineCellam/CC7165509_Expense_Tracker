@@ -9,16 +9,27 @@ const Expense = () => {
   const userId = user?._id;
 
   // Remove userId from all requests
-const fetchTransactions = async () => {
+// const fetchTransactions = async () => {
+//   try {
+//     const response = await apiService.transactions.getAll();
+//     const expenseTransactions = response.filter(t => t.type === "expense");
+//     setTransactions(expenseTransactions);
+//   } catch (error) {
+//     console.error("Error fetching expense transactions:", error);
+//   }
+// };
+
+// Income.jsx
+const fetchExpenseTransactions = async () => {
   try {
-    const response = await apiService.transactions.getAll();
-    const expenseTransactions = response.filter(t => t.type === "expense");
-    setTransactions(expenseTransactions);
+    const response = await apiService.transactions.getByType('expense');
+    setTransactions(response);
   } catch (error) {
-    console.error("Error fetching expense transactions:", error);
+    console.error("Error fetching expense:", error);
   }
 };
 
+// Expense.jsx would use getByType('expense')
 const addTransaction = async (newEntry) => {
   try {
     // Remove userId from request body

@@ -1,18 +1,12 @@
 {
   "routes": [
     {
-      "handle": "filesystem"
+      "src": "/api/.*",
+      "dest": "hhttps://cc7165509-expense-tracker.onrender.com/api/$1"
     },
     {
       "src": "/.*",
-      "dest": "/index.html",
-      "status": 200
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "https://your-backend-url.com/api/$1"
+      "dest": "/index.html"
     }
   ]
 }

@@ -9,15 +9,26 @@ const Income = () => {
   const userId = user?._id;
 
   // Remove userId from all requests
-const fetchTransactions = async () => {
+// const fetchTransactions = async () => {
+//   try {
+//     const response = await apiService.transactions.getAll();
+//     const incomeTransactions = response.filter(t => t.type === "income");
+//     setTransactions(incomeTransactions);
+//   } catch (error) {
+//     console.error("Error fetching income transactions:", error);
+//   }
+// };
+// Income.jsx
+const fetchIncomeTransactions = async () => {
   try {
-    const response = await apiService.transactions.getAll();
-    const incomeTransactions = response.filter(t => t.type === "income");
-    setTransactions(incomeTransactions);
+    const response = await apiService.transactions.getByType('income');
+    setTransactions(response);
   } catch (error) {
-    console.error("Error fetching income transactions:", error);
+    console.error("Error fetching income:", error);
   }
 };
+
+// Expense.jsx would use getByType('expense')
 
 const addTransaction = async (newEntry) => {
   try {

@@ -68,12 +68,30 @@ const apiService = {
   },
 
   // Transaction endpoints
-  transactions: {
-    getAll: (userId) => API.get(`/transactions/${userId}`),
-    create: (transactionData) => API.post('/transactions', transactionData),
-    delete: (id) => API.delete(`/transactions/${id}`),
-  },
+  // transactions: {
+  //   getAll: (userId) => API.get(`/transactions/${userId}`),
+  //   create: (transactionData) => API.post('/transactions', transactionData),
+  //   delete: (id) => API.delete(`/transactions/${id}`),
+  // },
 
+  // Transaction endpoints
+  // transactions: {
+  //   getAll: (userId) => API.get(`/transactions/${userId}`),
+  //   create: (transactionData) => API.post('/transactions', transactionData),
+  //   delete: (id) => API.delete(`/transactions/${id}`),
+  //   // Add an endpoint for fetching income transactions
+  //   getIncome: (userId) => API.get(`/transactions/${userId}/income`),
+  //   // Or perhaps a more general endpoint with a type filter
+  //   getTransactionsByType: (userId, type) => API.get(`/transactions/${userId}?type=${type}`),
+  // },
+
+  // apiService.js
+transactions: {
+  getAll: () => API.get('/api/transactions'), // Gets all for logged-in user
+  getByType: (type) => API.get(`/api/transactions/type/${type}`),
+  create: (data) => API.post('/api/transactions', data),
+  delete: (id) => API.delete(`/api/transactions/${id}`)
+},
   // Budget endpoints
   budgets: {
     getAll: (userId) => API.get(`/budgets/${userId}`),
