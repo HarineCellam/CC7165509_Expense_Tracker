@@ -2,7 +2,7 @@
   "routes": [
     {
       "src": "/api/.*",
-      "dest": "hhttps://cc7165509-expense-tracker.onrender.com/api/$1"
+      "dest": "https://cc7165509-expense-tracker.onrender.com/api/$1"
     },
     {
       "src": "/.*",
