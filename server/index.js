@@ -15,9 +15,9 @@ connectDB();
 
 // Routes
 app.use('/auth', require('./routes/authRoutes'));
-app.use('/api/budgets', require('./routes/budgetRoutes'));
-app.use('/api/transactions', require('./routes/transactionRoutes'));
-app.use('/api/profile', require('./routes/profileRoutes'));
+app.use('/budgets', require('./routes/budgetRoutes'));
+app.use('/transactions', require('./routes/transactionRoutes'));
+app.use('/profile', require('./routes/profileRoutes'));
 
 // Error handling middleware
 app.use((err, req, res, next) => {
