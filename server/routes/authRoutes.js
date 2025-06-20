@@ -18,7 +18,7 @@ router.post('/reset-password', async (req, res) => {
 
     const bcrypt = require('bcrypt');
     user.password = await bcrypt.hash(newPassword, 10);
-    user.otp = null; // clear OTP after success
+    user.otp = null;
     await user.save();
 
     res.json({ message: 'Password reset successful' });
