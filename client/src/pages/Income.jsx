@@ -8,33 +8,56 @@ const Income = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?._id;
 
-  const fetchTransactions = async () => {
-    try {
-      const response = await apiService.transactions.getAll(userId);
-      const incomeTransactions = response.filter((t) => t.type === "income");
-      setTransactions(incomeTransactions);
-    } catch (error) {
-      console.error("Error fetching income transactions:", error);
-    }
-  };
+  // Remove userId from all requests
+const fetchTransactions = async () => {
+  try {
+    const response = await apiService.transactions.getAll();
+    const incomeTransactions = response.filter(t => t.type === "income");
+    setTransactions(incomeTransactions);
+  } catch (error) {
+    console.error("Error fetching income transactions:", error);
+  }
+};
+
+const addTransaction = async (newEntry) => {
+  try {
+    // Remove userId from request body
+    await apiService.transactions.create({
+      ...newEntry,
+      type: "income"
+    });
+    fetchTransactions();
+  } catch (error) {
+    console.error("Error adding income transaction:", error);
+  }
+};
+  // const fetchTransactions = async () => {
+  //   try {
+  //     const response = await apiService.transactions.getAll(userId);
+  //     const incomeTransactions = response.filter((t) => t.type === "income");
+  //     setTransactions(incomeTransactions);
+  //   } catch (error) {
+  //     console.error("Error fetching income transactions:", error);
+  //   }
+  // };
 
   useEffect(() => {
     fetchTransactions();
   }, []);
 
-  const addTransaction = async (newEntry) => {
-    try {
-      const transactionData = {
-        ...newEntry,
-        type: "income",
-        userId,
-      };
-      await apiService.transactions.create(transactionData);
-      fetchTransactions();
-    } catch (error) {
-      console.error("Error adding income transaction:", error);
-    }
-  };
+  // const addTransaction = async (newEntry) => {
+  //   try {
+  //     const transactionData = {
+  //       ...newEntry,
+  //       type: "income",
+  //       userId,
+  //     };
+  //     await apiService.transactions.create(transactionData);
+  //     fetchTransactions();
+  //   } catch (error) {
+  //     console.error("Error adding income transaction:", error);
+  //   }
+  // };
 
   const deleteTransaction = async (id) => {
     try {
