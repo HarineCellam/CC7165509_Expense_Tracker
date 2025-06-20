@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
+import apiService from "../api";
 import TransactionForm from "../components/TransactionForm";
 import TransactionPanel from "../components/TransactionPanel";
 
 const Expense = () => {
   const [transactions, setTransactions] = useState([]);
-  const userId = localStorage.getItem('userId');
+  const user = JSON.parse(localStorage.getItem("user"));
+  const userId = user?._id;
 
   const fetchTransactions = async () => {
     try {
-      const response = await fetch(`/api/transactions?userId=${userId}&type=expense`);
-      const data = await response.json();
-      setTransactions(data);
+      // Get all transactions for the user
+      const response = await apiService.transactions.getAll(userId);
+      // Filter for expense-type transactions
+      const expenseTransactions = response.filter((t) => t.type === "expense");
+      setTransactions(expenseTransactions);
     } catch (error) {
-      console.error('Error fetching transactions:', error);
+      console.error("Error fetching transactions:", error);
     }
   };
 
@@ -22,38 +26,26 @@ const Expense = () => {
 
   const addTransaction = async (newEntry) => {
     try {
-      const response = await fetch('/api/transactions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...newEntry,
-          amount: -Math.abs(newEntry.amount),
-          type: "expense",
-          userId
-        }),
-      });
-      
-      if (response.ok) {
-        fetchTransactions(); // Refresh the list
-      }
+      const transactionData = {
+        ...newEntry,
+        // Store expense amounts as negative values
+        amount: -Math.abs(newEntry.amount),
+        type: "expense",
+        userId,
+      };
+      await apiService.transactions.create(transactionData);
+      fetchTransactions(); // Refresh list after adding
     } catch (error) {
-      console.error('Error adding transaction:', error);
+      console.error("Error adding transaction:", error);
     }
   };
 
   const deleteTransaction = async (id) => {
     try {
-      const response = await fetch(`/api/transactions?id=${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (response.ok) {
-        fetchTransactions(); // Refresh the list
-      }
+      await apiService.transactions.delete(id);
+      fetchTransactions(); // Refresh list after deletion
     } catch (error) {
-      console.error('Error deleting transaction:', error);
+      console.error("Error deleting transaction:", error);
     }
   };
 

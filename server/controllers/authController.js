@@ -12,9 +12,22 @@ const createToken = (id) => {
 // Signup
 exports.signup = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const {
+      name,
+      email,
+      password,
+      phone,
+      dob,
+      address,
+      city,
+      state,
+      country,
+      postalCode,
+      occupation,
+      gender,
+      maritalStatus
+    } = req.body;
 
-    // Basic validation
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Please provide name, email, and password' });
     }
@@ -27,16 +40,27 @@ exports.signup = async (req, res) => {
       return res.status(400).json({ message: 'Password must be at least 8 characters long' });
     }
 
-    // Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already in use' });
     }
 
-    // Create new user
-    const user = await User.create({ name, email, password });
+    const user = await User.create({
+      name,
+      email,
+      password,
+      phone,
+      dob,
+      address,
+      city,
+      state,
+      country,
+      postalCode,
+      occupation,
+      gender,
+      maritalStatus
+    });
 
-    // Create token
     const token = createToken(user._id);
 
     res.status(201).json({
@@ -72,7 +96,7 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: 'Incorrect email or password' });
     }
 
-    // If everything ok, send token to client
+    // If everything is ok, send token to client
     const token = createToken(user._id);
 
     res.status(200).json({

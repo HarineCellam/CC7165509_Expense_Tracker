@@ -1,8 +1,6 @@
-import { useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
-import API from './api';
 import './App.css';
-import DashboardLayout from "./components/DashboardLayout";
+import DashboardLayout from './components/DashboardLayout';
 import Budget from './pages/Budget';
 import Dashboard from './pages/Dashboard';
 import Expense from './pages/Expense';
@@ -15,23 +13,17 @@ import Report from './pages/Report';
 import SignUp from './pages/SignUp';
 
 function App() {
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      API.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-  }, []);
 
   return (
     <Router>
-      <div className='min-h-screen flex flex-col bg-white dark:bg-gray-900'>
+      <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
         <main className="flex-1 flex justify-center items-start bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
           <div className="w-full rounded-lg p-4 md:p-8 mt-0 md:mt-8 bg-white dark:bg-gray-800">
             <Routes>
-              <Route path='/' element={<Home/>} />
+              <Route path="/" element={<Home />} />
               <Route path="/login" element={<LogIn />} />
               <Route path="/signup" element={<SignUp />} />
-              <Route path='/forgotpassword' element={<ForgotPassword />} />
+              <Route path="/forgotpassword" element={<ForgotPassword />} />
               <Route element={<DashboardLayout />}>
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/dashboard" element={<Dashboard />} />

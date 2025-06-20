@@ -1,39 +1,45 @@
 import { useEffect, useState } from 'react';
-import { FaCalendarAlt, FaChartPie, FaRupeeSign, FaTrashAlt } from 'react-icons/fa';
+import { FaCalendarAlt, FaChartPie, FaEdit, FaRupeeSign, FaTrashAlt } from 'react-icons/fa';
 import apiService from '../api';
 
 const Budget = () => {
   const [budgets, setBudgets] = useState([]);
   const [formData, setFormData] = useState({
-    category: '',
-    amount: '',
-    period: 'monthly'
+    category: "",
+    amount: "",
+    period: "monthly"
   });
-  const [activeTab, setActiveTab] = useState('weekly');
+  const [activeTab, setActiveTab] = useState("monthly");
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // Default categories
+  const [transactions, setTransactions] = useState([]);
+
   const expenseCategories = [
-    "Food", "Rent", "Transport", "Entertainment", 
+    "Food", "Rent", "Transport", "Entertainment",
     "Utilities", "Shopping", "Health", "Education", "Other"
   ];
   
   const periods = ['daily', 'weekly', 'monthly', 'yearly'];
 
-  const user = JSON.parse(localStorage.getItem('user'));
-  const userId = user?._id;
-
-  const fetchBudgets = async () => {
+  // Fetch budgets and transactions from API
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await apiService.budgets.getAll(userId);
-      setBudgets(response.data);
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (!user?._id) throw new Error("User not found");
+
+      const [budgetsRes, transactionsRes] = await Promise.all([
+        apiService.budgets.getAll(user._id),
+        apiService.transactions.getAll(user._id)
+      ]);
+
+      setBudgets(budgetsRes || []);
+      setTransactions(transactionsRes || []);
     } catch (error) {
-      console.error('Error fetching budgets:', error);
-      setError('Failed to load budgets. Please try again.');
+      console.error('Error fetching data:', error);
+      setError('Failed to load data');
       if (error.response?.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
@@ -49,9 +55,40 @@ const Budget = () => {
     if (!token) {
       window.location.href = '/login';
     } else {
-      fetchBudgets();
+      fetchData();
     }
   }, []);
+
+  // Calculate progress based on actual transactions
+  const calculateProgress = (budget) => {
+    if (!budget || !transactions) return { value: 0, status: 'good' };
+    
+    const periodStart = getPeriodStart(budget.period);
+    const relevantTransactions = transactions.filter(t => 
+      t.category === budget.category && 
+      new Date(t.date) >= periodStart &&
+      t.type === 'expense'
+    );
+    
+    const totalSpent = relevantTransactions.reduce((sum, t) => sum + Math.abs(t.amount || 0), 0);
+    const progress = (totalSpent / (budget.amount || 1)) * 100;
+    
+    return {
+      value: Math.min(Math.round(progress), 100),
+      status: progress > 100 ? 'over' : progress > 75 ? 'warning' : 'good'
+    };
+  };
+
+  const getPeriodStart = (period) => {
+    const now = new Date();
+    switch (period) {
+      case 'daily': return new Date(now.setHours(0, 0, 0, 0));
+      case 'weekly': return new Date(now.setDate(now.getDate() - now.getDay()));
+      case 'monthly': return new Date(now.getFullYear(), now.getMonth(), 1);
+      case 'yearly': return new Date(now.getFullYear(), 0, 1);
+      default: return new Date(0);
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -71,20 +108,23 @@ const Budget = () => {
     
     try {
       setError(null);
+      const user = JSON.parse(localStorage.getItem('user'));
       const budgetData = {
         category: formData.category,
         amount: Number(formData.amount),
         period: formData.period,
-        userId
+        userId: user?._id
       };
 
       if (editingId) {
+        // Use PUT request for editing
         await apiService.budgets.update(editingId, budgetData);
       } else {
+        // Use POST request for creating
         await apiService.budgets.create(budgetData);
       }
 
-      await fetchBudgets();
+      await fetchData();
       setFormData({ category: '', amount: '', period: 'monthly' });
       setEditingId(null);
     } catch (error) {
@@ -106,7 +146,7 @@ const Budget = () => {
     try {
       setError(null);
       await apiService.budgets.delete(id);
-      await fetchBudgets();
+      await fetchData();
       if (editingId === id) {
         setEditingId(null);
         setFormData({ category: '', amount: '', period: 'monthly' });
@@ -117,21 +157,9 @@ const Budget = () => {
     }
   };
 
-  // Filter budgets by period
   const filteredBudgets = budgets.filter(budget => budget.period === activeTab);
-  
-  // Calculate totals
-  const totalBudget = filteredBudgets.reduce((sum, budget) => sum + budget.amount, 0);
-  const totalAllBudgets = budgets.reduce((sum, budget) => sum + budget.amount, 0);
-  
-  // Calculate progress for each budget
-  const calculateProgress = (budget) => {
-    const randomProgress = Math.floor(Math.random() * 100);
-    return {
-      value: randomProgress,
-      status: randomProgress > 90 ? 'over' : randomProgress > 75 ? 'warning' : 'good'
-    };
-  };
+  const totalBudget = filteredBudgets.reduce((sum, budget) => sum + (budget?.amount || 0), 0);
+  const totalAllBudgets = budgets.reduce((sum, budget) => sum + (budget?.amount || 0), 0);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 md:p-6">
@@ -320,7 +348,7 @@ const Budget = () => {
                           </div>
                           <div className="text-lg font-bold flex items-center">
                             <FaRupeeSign className="mr-1" />
-                            {budget.amount.toLocaleString('en-IN')}
+                            {budget.amount?.toLocaleString('en-IN') || '0'}
                           </div>
                         </div>
                         
@@ -348,9 +376,9 @@ const Budget = () => {
                         <div className="flex justify-end gap-2 mt-3">
                           <button
                             onClick={() => handleEdit(budget)}
-                            className="px-3 py-1 text-sm bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg"
+                            className="px-3 py-1 text-sm bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg flex items-center"
                           >
-                            Edit
+                            <FaEdit className="mr-1" /> Edit
                           </button>
                           <button
                             onClick={() => handleDelete(budget._id)}
