@@ -25,7 +25,7 @@ const fetchExpenseTransactions = async () => {
     const response = await apiService.transactions.getByType('expense');
     setTransactions(response);
   } catch (error) {
-    console.error("Error fetching :", error);
+    console.error("Error fetching expense:", error);
   }
 };
 
