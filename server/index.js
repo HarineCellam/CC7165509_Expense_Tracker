@@ -14,7 +14,7 @@ const connectDB = require('./config/db');
 connectDB();
 
 // Routes
-app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/auth', require('./routes/authRoutes'));
 app.use('/api/budgets', require('./routes/budgetRoutes'));
 app.use('/api/transactions', require('./routes/transactionRoutes'));
 app.use('/api/profile', require('./routes/profileRoutes'));
