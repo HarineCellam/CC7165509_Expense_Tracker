@@ -15,7 +15,7 @@ import SignUp from './pages/SignUp';
 function App() {
 
   return (
-    <Router>
+    <Router basename='/'>
       <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900">
         <main className="flex-1 flex justify-center items-start bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
           <div className="w-full rounded-lg p-4 md:p-8 mt-0 md:mt-8 bg-white dark:bg-gray-800">

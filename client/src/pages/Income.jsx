@@ -31,33 +31,10 @@ const addTransaction = async (newEntry) => {
     console.error("Error adding income transaction:", error);
   }
 };
-  // const fetchTransactions = async () => {
-  //   try {
-  //     const response = await apiService.transactions.getAll(userId);
-  //     const incomeTransactions = response.filter((t) => t.type === "income");
-  //     setTransactions(incomeTransactions);
-  //   } catch (error) {
-  //     console.error("Error fetching income transactions:", error);
-  //   }
-  // };
 
   useEffect(() => {
     fetchTransactions();
   }, []);
-
-  // const addTransaction = async (newEntry) => {
-  //   try {
-  //     const transactionData = {
-  //       ...newEntry,
-  //       type: "income",
-  //       userId,
-  //     };
-  //     await apiService.transactions.create(transactionData);
-  //     fetchTransactions();
-  //   } catch (error) {
-  //     console.error("Error adding income transaction:", error);
-  //   }
-  // };
 
   const deleteTransaction = async (id) => {
     try {
