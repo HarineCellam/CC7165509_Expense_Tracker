@@ -8,37 +8,61 @@ const Expense = () => {
   const user = JSON.parse(localStorage.getItem("user"));
   const userId = user?._id;
 
-  const fetchTransactions = async () => {
-    try {
-      // Get all transactions for the user
-      const response = await apiService.transactions.getAll(userId);
-      // Filter for expense-type transactions
-      const expenseTransactions = response.filter((t) => t.type === "expense");
-      setTransactions(expenseTransactions);
-    } catch (error) {
-      console.error("Error fetching transactions:", error);
-    }
-  };
+  // Remove userId from all requests
+const fetchTransactions = async () => {
+  try {
+    const response = await apiService.transactions.getAll();
+    const expenseTransactions = response.filter(t => t.type === "expense");
+    setTransactions(expenseTransactions);
+  } catch (error) {
+    console.error("Error fetching expense transactions:", error);
+  }
+};
+
+const addTransaction = async (newEntry) => {
+  try {
+    // Remove userId from request body
+    await apiService.transactions.create({
+      ...newEntry,
+      type: "expense"
+    });
+    fetchTransactions();
+  } catch (error) {
+    console.error("Error adding expense transaction:", error);
+  }
+};
+
+  // const fetchTransactions = async () => {
+  //   try {
+  //     // Get all transactions for the user
+  //     const response = await apiService.transactions.getAll(userId);
+  //     // Filter for expense-type transactions
+  //     const expenseTransactions = response.filter((t) => t.type === "expense");
+  //     setTransactions(expenseTransactions);
+  //   } catch (error) {
+  //     console.error("Error fetching transactions:", error);
+  //   }
+  // };
 
   useEffect(() => {
     fetchTransactions();
   }, []);
 
-  const addTransaction = async (newEntry) => {
-    try {
-      const transactionData = {
-        ...newEntry,
-        // Store expense amounts as negative values
-        amount: -Math.abs(newEntry.amount),
-        type: "expense",
-        userId,
-      };
-      await apiService.transactions.create(transactionData);
-      fetchTransactions(); // Refresh list after adding
-    } catch (error) {
-      console.error("Error adding transaction:", error);
-    }
-  };
+  // const addTransaction = async (newEntry) => {
+  //   try {
+  //     const transactionData = {
+  //       ...newEntry,
+  //       // Store expense amounts as negative values
+  //       amount: -Math.abs(newEntry.amount),
+  //       type: "expense",
+  //       userId,
+  //     };
+  //     await apiService.transactions.create(transactionData);
+  //     fetchTransactions(); // Refresh list after adding
+  //   } catch (error) {
+  //     console.error("Error adding transaction:", error);
+  //   }
+  // };
 
   const deleteTransaction = async (id) => {
     try {

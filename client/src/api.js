@@ -69,9 +69,9 @@ const apiService = {
 
   // Transaction endpoints
   transactions: {
-    getAll: (userId) => API.get(`/transactions/${userId}`),
-    create: (transactionData) => API.post('/transactions', transactionData),
-    delete: (id) => API.delete(`/transactions/${id}`),
+    getAll: (userId) => API.get(`api/transactions/${userId}`),
+    create: (transactionData) => API.post('api/transactions', transactionData),
+    delete: (id) => API.delete(`api/transactions/${id}`),
   },
 
   // Budget endpoints
