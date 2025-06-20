@@ -28,8 +28,6 @@ const fetchIncomeTransactions = async () => {
   }
 };
 
-// Expense.jsx would use getByType('expense')
-
 const addTransaction = async (newEntry) => {
   try {
     // Remove userId from request body
