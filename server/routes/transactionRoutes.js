@@ -7,5 +7,5 @@ const router = express.Router();
 router.post('/', authMiddleware, transactionController.createTransaction);
 router.get('/', authMiddleware, transactionController.getUserTransactions);
 router.delete('/:id', authMiddleware, transactionController.deleteTransaction);
-
+router.get('/type/:type', authMiddleware, transactionController.getTransactionsByType);
 module.exports = router;

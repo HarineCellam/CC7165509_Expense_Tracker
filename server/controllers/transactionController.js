@@ -39,9 +39,6 @@ exports.getTransactionsByType = async (req, res) => {
   }
 };
 
-// In transactionRoutes.js
-router.get('/type/:type', authMiddleware, transactionController.getTransactionsByType);
-
 exports.getUserTransactions = async (req, res) => {
   try {
     // Get transactions for logged-in user
